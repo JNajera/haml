@@ -582,11 +582,18 @@ module Haml
     # Iterates through the classes and ids supplied through `.`
     # and `#` syntax, and returns a hash with them as attributes,
     # that can then be merged with another attributes hash.
-    def self.parse_class_and_id(list)
+        def self.parse_class_and_id(list)
       attributes = {}
       return attributes if list.empty?
 
-      list.scan(/([#.])([-:_a-zA-Z0-9\@]+)/) do |type, property|
+      # Enhanced parsing to support Tailwind CSS classes with special characters
+      # This supports:
+      # - Regular classes: text-sm, container, etc.
+      # - Classes with slashes: text-sm/6, text-lg/8, etc.
+      # - Some Tailwind CSS classes with special characters (limited by parse_tag)
+      # Note: Some complex Tailwind patterns may not work due to parse_tag limitations
+
+      list.scan(/([#.])([-:_a-zA-Z0-9\@\/]+)/) do |type, property|
         case type
         when '.'
           if attributes[CLASS_KEY]
